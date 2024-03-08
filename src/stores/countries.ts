@@ -1,28 +1,8 @@
 import { defineStore } from 'pinia'
-
-export interface State {
-  countries: Country[];
-  selectedCountry: Country | null;
-  regions: any[];
-  selectedRegion?: string;
-  search?: string;
-  darkMode: boolean
-}
-
-export interface Country {
-  name: any;
-  flags: any;
-  population: number;
-  region: string;
-  subregion: string;
-  capital: string[];
-  tld: string[];
-  currencies: any;
-  languages: any;
-}
+import type { Country, State } from './countries.model';
 
 const useCountriesStore = defineStore('countries', {
-  state: (): State => ({ countries: [], selectedCountry: null, regions:[], darkMode: true}),
+  state: (): State => ({ countries: [], selectedCountry: null, regions:[], darkMode: true, loading: false}),
   getters: {
     getCountryInfo(): any[] {
       return [
@@ -33,38 +13,51 @@ const useCountriesStore = defineStore('countries', {
           { label: 'Capital', value: this.selectedCountry?.capital?.toString() },
           { label: 'Top Level Domain', value: this.selectedCountry?.tld?.toString() },
           { label: 'Currencies', value: this.selectedCountry?.currencies ? Object.values(this.selectedCountry.currencies)[0]?.name : '' },
-          { label: 'Languages', value: this.selectedCountry?.languages ? Object.values(this.selectedCountry.languages).toString() : '' },
+          { label: 'Languages', value: this.selectedCountry?.languages ? Object.values(this.selectedCountry.languages).join(', ') : '' },
       ]
     },
     filterCountries: (state) => {
-      return (filter?: {field: string, value: string}) => {
-        if (filter) {
-          return state.countries.filter((country: any) => country[filter.field] === filter.value)
+        let result = state.countries;
+        if (state.selectedRegion) {
+          result = result.filter((country: Country) => country['region'] === state.selectedRegion)
         }
-        return state.countries
-      }
+
+        if (state.search) {
+          result = result.filter((country: Country) => country.name.common.toLowerCase().includes(state.search))
+        }
+        return result
+    },
+    getCountry: (state) => (code: string) => {
+      return state.countries.find(country => country.cca3 === code)
+    },
+    getBorderNames: (state) => (borders: any[]) => {
+      return borders.map(border => {
+        return {cca3: border, name: state.countries.find(c => c.cca3 === border)?.name.common || border}
+      });
     }
   },
   actions: {
     async fetchCountries() {
-      fetch('https://restcountries.com/v3.1/all?fields=name,flags,population,region,capital,borders')
+      this.loading = true
+      fetch('https://restcountries.com/v3.1/all?fields=name,flags,population,region,capital,borders,cca3')
       .then(response => response.json())
       .then(
         data => {
           this.countries = data;
-          const regions = data.flatMap((country: any) => country.region)
-          this.regions = regions.filter((value, index, array) => array.indexOf(value) === index)
+          const regions = data.flatMap((country: Country) => country.region)
+          this.regions = regions.filter((value: string, index: number, array: string[]) => array.indexOf(value) === index)
         }
-      );
+      ).finally(() => this.loading = false);
     },
     async fetchCountry(name: string) {
+      this.loading = true
       fetch(`https://restcountries.com/v3.1/name/${name}`)
       .then(response => response.json())
       .then(
         data => {
           this.selectedCountry = data.at(0);
         }
-      );
+      ).finally(() => this.loading = false);
     },
     toggleDarkMode() {
       this.darkMode = !this.darkMode

@@ -22,7 +22,7 @@ export default defineComponent({
 <template>
     <main :class="`h-full min-h-screen bg-primary-background dark:bg-secondary-background text-primary-text dark:text-secondary-text ${store.darkMode ? 'dark' : ''}`">
         <CountriesHeader />
-
+        
         <router-view v-slot="{ Component }">
             <transition name="slide-right">
                 <component :is="Component"/>
