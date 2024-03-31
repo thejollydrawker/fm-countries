@@ -24,9 +24,22 @@ export default defineComponent({
         <CountriesHeader />
         
         <router-view v-slot="{ Component }">
-            <transition name="slide-right">
+            <Transition name="fade">
                 <component :is="Component"/>
-            </transition>
+            </Transition>
         </router-view>
     </main>
 </template>
+<style>
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease-in;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+</style>
