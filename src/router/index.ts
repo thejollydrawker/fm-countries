@@ -1,12 +1,17 @@
 import Country from '@/views/Country.vue'
 import Home from '@/views/Home.vue'
+import CHome from '@/views/composition/CHome.vue';
+import CCountry from '@/views/composition/CCountry.vue'
 import NotFound from '@/views/NotFound.vue'
 import { createRouter, createWebHashHistory } from 'vue-router'
 
 export const ROUTES = {
     HOME: "home",
+    CHOME: 'c-home',
     COUNTRY: "country",
-    NOT_FOUND: "404"
+    CCOUNTRY: 'c-country',
+    NOT_FOUND: "404",
+
 }
 
 const routes = [
@@ -20,10 +25,22 @@ const routes = [
         name: ROUTES.COUNTRY,
         component: Country 
     },
+    {
+        path: '/composition',
+        name: ROUTES.CHOME,
+        component: CHome,
+    },
+    { 
+        path: '/composition/country/:id',
+        name: ROUTES.CCOUNTRY,
+        component: CCountry,
+        props: true
+    },
     { 
         path: '/:pathMatch(.*)',
         name: 'NotFound',
-        component: NotFound },
+        component: NotFound 
+    },
 ]
 
 export const router = createRouter({

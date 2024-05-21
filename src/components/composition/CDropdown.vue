@@ -1,3 +1,25 @@
+<script lang="ts" setup>
+import useCountriesStore from '@/stores/countries';
+import { ref } from 'vue';
+
+const store = useCountriesStore();
+
+const isOpen = ref(false);
+
+const emit = defineEmits(['filter']);
+
+const setRegion = (region?: string): void => {
+    store.selectedRegion = region;
+    closeElement();
+    emit('filter');
+}
+
+const closeElement = (): void => {
+    isOpen.value = false;
+}
+
+</script>
+
 <template>
     <div id="dropdownPanel" class="relative w-fit select-none group">
         <div @click="isOpen = !isOpen" class="min-w-48 w-fit p-3 rounded-md min-h-16 bg-primary-element dark:bg-secondary-element flex items-center justify-between text-sm cursor-pointer shadow-lg">
@@ -23,33 +45,3 @@
         </div>
     </div>
 </template>
-<script lang="ts">
-import useCountriesStore from '@/stores/countries';
-import { defineComponent } from 'vue';
-
-export default defineComponent({
-    name: 'CountryDropdown',
-    emits: ['filter'],
-    data() {
-        return {
-            isOpen: false
-        }
-    },
-    setup() {
-        const store = useCountriesStore();
-        return {
-            store
-        }
-    },
-    methods: {
-        closeElement () {
-            this.isOpen = false;
-        },
-        setRegion (region?: string) {
-           this.store.selectedRegion = region;
-           this.closeElement()
-           this.$emit('filter');
-        }
-    }
-})
-</script>
